@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Data</title>
+    <link rel="stylesheet" href="/styles/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="/">أدخل عطل جديد</a></li>
+
+        </ul>
+    </nav>
+    <div class="container">
+        <h1>عرض البيانات</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>تاريخ البداية</th>
+                    <th>تاريخ النهاية</th>
+                    <th>من</th>
+                    <th>الى</th>
+                    <th>نوع الصيانه</th>
+                    <th>نوع المكينة</th>
+                    <th>نوع العطل</th>
+                    <th>العطل</th>
+                    <th>ملاحاظات</th>
+                    <th>حذف</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% data.forEach((record, index) => { %>
+                    <tr>
+                        <td><%= record.startDate %></td>
+                        <td><%= record.endDate %></td>
+                        <td><%= record.startTime %></td>
+                        <td><%= record.endTime %></td>
+                        <td><%= record.maintenance %></td>
+                        <td><%= record.machineName %></td>
+                        <td><%= record.typeOfError %></td>
+                        <td><%= record.whatError %></td>
+                        <td><%= record.others %></td>
+                        <td>
+                            <form class ='deletbtn' action="/delete/<%= index %>" method="POST" style="display:inline;">
+                                <button type="submit" class ='deletbtn' >حذف</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+<!--
+    <button id="downloadExcel">Click to Download an Excel file</button>
+-->
+    <script>
+        document.getElementById('downloadExcel').addEventListener('click', () => {
+            window.location.href = '/download-excel';
+        });
+    </script>
+</body>
+</html>

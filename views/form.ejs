@@ -1,0 +1,166 @@
+<!-- views/form.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Error Form</title>
+    <link rel="stylesheet" href="/styles/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="/view">عرض البيانات</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <form id="errorForm" action="/submit" method="POST">
+            <h1>صيانة MMC</h1>
+
+            <label for="startDate">تاريخ البداية:</label>
+            <input type="date" id="startDate" name="startDate" required><br>
+
+            <label for="endDate">تاريخ النهاية:</label>
+            <input type="date" id="endDate" name="endDate" required><br>
+
+            <label for="startTime">من:</label>
+            <input type="time" id="startTime" name="startTime" required><br>
+
+            <label for="endTime">الى:</label>
+            <input type="time" id="endTime" name="endTime" required><br>
+
+            <label for="maintenance">نوع الصيانه:</label>
+            <select id="maintenance" name="maintenance" required>
+                <option value="" disabled selected> </option>
+                <option value="طارئه">طارئه</option>
+                <option value="وقائيه">وقائيه</option>
+            </select><br>
+
+            <label for="machineName">نوع المكينة:</label>
+            <select id="machineName" name="machineName" required>
+                <option value="" disabled selected> </option>
+                <% Object.keys(machineErrors).forEach(machine => { %>
+                    <option value="<%= machine %>" <%= selectedMachine === machine ? 'selected' : '' %>>
+                        <%= machine %>
+                    </option>
+                <% }) %>
+            </select><br>
+
+            <label for="typeOfError">نوع العطل:</label>
+            <select id="typeOfError" name="typeOfError" required>
+                <option value="" disabled selected> </option>
+                <option value="الميكانيكيه" <%= selectedErrorType === 'الميكانيكيه' ? 'selected' : '' %>>ميكانيكية</option>
+                <option value="كهربائية" <%= selectedErrorType === 'كهربائية' ? 'selected' : '' %>>كهربائية</option>
+            </select><br>
+
+            <label for="whatError">العطل:</label>
+            <select id="whatError" name="whatError" required>
+                <option value="" disabled selected> </option>
+            </select><br>
+
+            <textarea placeholder="اكتب العطل هنا" name="others" id="others" style="display: none;"></textarea>
+
+            <button type="submit">حفظ</button>
+        </form>
+    </div>
+
+    <script>
+        const machineErrors = <%- JSON.stringify(machineErrors || {}) %>;
+        const machineSelect = document.getElementById('machineName');
+        const errorTypeSelect = document.getElementById('typeOfError');
+        const whatErrorSelect = document.getElementById('whatError');
+        const otherErrorText = document.getElementById('others');
+
+    function updateErrors() {
+            const machine = machineSelect.value;
+            const errorType = errorTypeSelect.value;
+            while (whatErrorSelect.options.length) {
+                whatErrorSelect.remove(0);
+            }
+
+            if (machine && errorType) {
+                const errors = (machineErrors[machine] && machineErrors[machine][errorType]) || [];
+                errors.forEach(error => {
+                    const option = document.createElement('option');
+                    option.value = error;
+                    option.text = error;
+                    whatErrorSelect.add(option);
+                });
+
+                // Add "اخري" option
+                const otherOption = document.createElement('option');
+                otherOption.value = 'اخري';
+                otherOption.text = 'اخري';
+                whatErrorSelect.add(otherOption);
+            } else {
+                const option = document.createElement('option');
+                option.value = '';
+                option.text = '';
+                option.disabled = true;
+                option.selected = true;
+                whatErrorSelect.add(option);
+            }
+        }
+
+    document.addEventListener('DOMContentLoaded', function() {
+    const startDateInput = document.getElementById('startDate');
+    const startTimeInput = document.getElementById('startTime');
+    const endDateInput = document.getElementById('endDate');
+    const endTimeInput = document.getElementById('endTime');
+
+    function validateDates() {
+        const startDate = new Date(startDateInput.value);
+        const endDate = new Date(endDateInput.value);
+
+       
+        if (startDate > endDate) {
+            alert('تاريخ النهاية لا يمكن ان يكون قبل تاريخ البداية.');
+            endDateInput.value = ''; 
+            return false;
+        }
+
+        if (startDate.getTime() === endDate.getTime()) {
+            const startTime = new Date(`1970-01-01T${startTimeInput.value}`);
+            const endTime = new Date(`1970-01-01T${endTimeInput.value}`);
+
+            if (startTime > endTime) {
+                alert('وقت النهاية لا يمكن ان يكون قبل وقت البداية.');
+                endTimeInput.value = '';  
+                return false;
+            }
+        }
+
+        return true;  
+    }
+
+    
+    document.getElementById('errorForm').addEventListener('submit', function(event) {
+        if (!validateDates()) {
+            event.preventDefault(); 
+         }
+    });
+});
+
+
+
+        machineSelect.addEventListener('change', updateErrors);
+        errorTypeSelect.addEventListener('change', updateErrors);
+
+        whatErrorSelect.addEventListener('change', function() {
+            if (this.value === 'اخري') {
+                otherErrorText.style.display = 'block';
+                otherErrorText.required = true;
+            } else {
+                otherErrorText.style.display = 'none';
+                otherErrorText.required = false;
+            }
+        });
+
+        startDateInput.addEventListener('change', validateDates);
+        startTimeInput.addEventListener('change', validateDates);
+        endDateInput.addEventListener('change', validateDates);
+        endTimeInput.addEventListener('change', validateDates);
+    </script>
+</body>
+</html>
